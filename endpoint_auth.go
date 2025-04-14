@@ -8,7 +8,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -20,7 +19,6 @@ import (
 
 	"github.com/MicahParks/keyfunc/v3"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
@@ -181,13 +179,15 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 	if err != nil {
 		return "", -1, fmt.Errorf("begin transaction: %w", err)
 	}
-	defer func(ctx context.Context) {
-		if err := tx.Rollback(ctx); err != nil && !errors.Is(err, pgx.ErrTxClosed) {
-			log.Printf("failed to rollback transaction: %v", err)
-		}
-	}(req.Context())
+	/*
+		defer func(ctx context.Context) {
+			if err := tx.Rollback(ctx); err != nil && !errors.Is(err, pgx.ErrTxClosed) {
+				log.Printf("failed to rollback transaction: %v", err)
+			}
+		}(req.Context())
+	*/
 
-	_ = tx.QueryRow( // TODO: No legal sex
+	_ = db.QueryRow( // TODO: No legal sex
 		req.Context(),
 		"SELECT legal_sex from expected_students WHERE id = $1",
 		studentID,
@@ -270,6 +270,13 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 		return "", -1, fmt.Errorf("commit transaction: %w", err)
 	}
 
+	if department == "Staff" {
+
+		http.Redirect(w, req, "/", http.StatusSeeOther)
+
+		return "", -1, nil
+	}
+
 	// TODO: Do this in the root page instead
 	rows, err := db.Query(req.Context(), `SELECT course_id FROM pre_selected WHERE student_id = $1`, studentID)
 	if err != nil {
@@ -309,7 +316,7 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 		func() {
 			course.SelectedLock.Lock()
 			defer course.SelectedLock.Unlock()
-			atomic.AddUint32(&course.Selected, 1)
+			fmt.Println("incremented to", atomic.AddUint32(&course.Selected, 1))
 		}()
 	}
 
