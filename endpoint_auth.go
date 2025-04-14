@@ -177,11 +177,19 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 			}
 		}()
 
-		tx.QueryRow(
+		err = tx.QueryRow(
 			req.Context(),
 			"SELECT legal_sex from expected_students WHERE id = $1",
 			studentID,
 		).Scan(&legalSex)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return "", http.StatusBadRequest,
+					fmt.Errorf("student %s unexpected", studentID)
+			}
+			return "", -1, fmt.Errorf("query expected_students for registered legal sex: %w", err)
+		}
+
 		_, err = db.Exec(
 			req.Context(),
 			"INSERT INTO users (id, name, email, department, session, expr, confirmed, legal_sex) VALUES ($1, $2, $3, $4, $5, $6, false, $7)",
