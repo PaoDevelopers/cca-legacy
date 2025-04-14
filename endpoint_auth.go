@@ -264,6 +264,7 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 
 	log.Printf("Student-ish %s (%s, %s) logged in", claims.Name, claims.Email, claims.Oid)
 
+	// TODO: Do this in the root page instead
 	_, err = tx.Exec(req.Context(), `INSERT INTO choices (userid, courseid, seltime, forced)
 		SELECT $1, course_id, EXTRACT(EPOCH FROM now()) * 1000000, true
 		FROM pre_selected
