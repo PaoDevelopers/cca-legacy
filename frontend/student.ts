@@ -199,11 +199,20 @@ function handle_course_rejection(course_id: string, reason: string): void {
 	(status_element as HTMLElement).style.color = 'red';
 	checkbox.checked = false;
 	checkbox.indeterminate = false;
-	if (reason === 'Full') {
-		checkbox.disabled = true;
-	}
 	update_confirm_button_state();
 }
+
+function handle_course_unconfirm_rejection(course_id: string, reason: string): void {
+	const status_element = document.getElementById(`coursestatus${course_id}`)!;
+	const checkbox = document.getElementById(`tick${course_id}`) as HTMLInputElement;
+
+	status_element.textContent = reason;
+	(status_element as HTMLElement).style.color = 'red';
+	checkbox.checked = true;
+	checkbox.indeterminate = false;
+	update_confirm_button_state();
+}
+
 
 function handle_course_approval(course_id: string): void {
 	const status_element = document.getElementById(`coursestatus${course_id}`)!;
@@ -292,6 +301,7 @@ function handle_socket_message(event: MessageEvent): void {
 		'N': () => handle_course_removal(args[0]),
 		'M': () => handle_course_max_update(args[0], args[1]),
 		'R': () => handle_course_rejection(args[0], args[1]),
+		'RU': () => handle_course_unconfirm_rejection(args[0], args[1]),
 		'Y': () => handle_course_approval(args[0]),
 		'STOP': () => handle_stop_state(),
 		'START': () => handle_start_state(),

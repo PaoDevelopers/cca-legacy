@@ -76,7 +76,7 @@ func handleNewForcedChoices(w http.ResponseWriter, req *http.Request) (string, i
 	if sectionIDIndex == -1 {
 		return "", http.StatusBadRequest, wrapAny(
 			errMissingCSVColumn,
-			"Legal Sex",
+			"Section ID",
 		)
 	}
 
@@ -157,6 +157,15 @@ func handleNewForcedChoices(w http.ResponseWriter, req *http.Request) (string, i
 			).Scan(&courseID)
 			if err != nil {
 				return false, -1, fmt.Errorf("while inserting line %d: %w", lineNumber, err)
+			}
+
+			_, err = tx.Exec(
+				ctx,
+				"UPDATE courses SET forced = true WHERE id = $1",
+				courseID,
+			)
+			if err != nil {
+				return false, -1, wrapError(errUnexpectedDBError, err)
 			}
 
 			_course, ok := courses.Load(courseID)

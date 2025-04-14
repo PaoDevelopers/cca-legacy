@@ -9,6 +9,7 @@ CREATE TABLE courses (
 	course_id TEXT NOT NULL,
 	section_id TEXT NOT NULL,
 	year_groups SMALLINT NOT NULL,
+	forced BOOLEAN NOT NULL,
 	legal_sex_requirements TEXT NOT NULL CHECK (legal_sex_requirements IN ('F', 'M', '')) -- ouch
 );
 CREATE TABLE users (

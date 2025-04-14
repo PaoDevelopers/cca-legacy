@@ -39,15 +39,6 @@ func messageUnchooseCourse(
 		return nil
 	}
 
-	select {
-	case <-ctx.Done():
-		return wrapError(
-			errWsHandlerContextCanceled,
-			ctx.Err(),
-		)
-	default:
-	}
-
 	if len(mar) != 2 {
 		return errBadNumberOfArguments
 	}
@@ -67,6 +58,17 @@ func messageUnchooseCourse(
 	}
 	if course == nil {
 		return errNoSuchCourse
+	}
+
+	if course.Forced {
+		err := writeText(ctx, c, "RU :Commitment")
+		if err != nil {
+			return wrapError(
+				errCannotSend,
+				err,
+			)
+		}
+		return nil
 	}
 
 	ct, err := db.Exec(

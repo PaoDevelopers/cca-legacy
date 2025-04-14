@@ -262,7 +262,7 @@ func handleNewCourses(w http.ResponseWriter, req *http.Request) (string, int, er
 
 			_, err = tx.Exec(
 				ctx,
-				"INSERT INTO courses(nmax, title, teacher, location, ctype, cgroup, section_id, course_id, legal_sex_requirements, year_groups) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+				"INSERT INTO courses(nmax, title, teacher, location, ctype, cgroup, section_id, course_id, legal_sex_requirements, year_groups, forced) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, false)",
 				line[maxIndex],
 				line[titleIndex],
 				line[teacherIndex],
