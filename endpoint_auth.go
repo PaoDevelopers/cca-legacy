@@ -15,6 +15,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/MicahParks/keyfunc/v3"
@@ -262,20 +263,54 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 		}
 	}
 
-	log.Printf("Student-ish %s (%s, %s) logged in", claims.Name, claims.Email, claims.Oid)
-
-	// TODO: Do this in the root page instead
-	_, err = tx.Exec(req.Context(), `INSERT INTO choices (userid, courseid, seltime, forced)
-		SELECT $1, course_id, EXTRACT(EPOCH FROM now()) * 1000000, true
-		FROM pre_selected
-		WHERE student_id = $2`, claims.Oid, studentID)
-	if err != nil {
-		return "", http.StatusInternalServerError, fmt.Errorf("failed to move pre_selected choices: %w", err)
-	}
+	log.Printf("%s (%s, %s) just authenticated", claims.Name, claims.Email, claims.Oid)
 
 	err = tx.Commit(req.Context())
 	if err != nil {
 		return "", -1, fmt.Errorf("commit transaction: %w", err)
+	}
+
+	// TODO: Do this in the root page instead
+	rows, err := db.Query(req.Context(), `SELECT course_id FROM pre_selected WHERE student_id = $1`, studentID)
+	if err != nil {
+		return "", http.StatusInternalServerError, fmt.Errorf("failed to fetch pre_selected choices: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var courseID string
+		if err := rows.Scan(&courseID); err != nil {
+			return "", http.StatusInternalServerError, fmt.Errorf("failed to scan course_id: %w", err)
+		}
+
+		_, err = db.Exec(req.Context(),
+			`INSERT INTO choices (userid, courseid, seltime, forced) VALUES ($1, $2, $3, true)`,
+			claims.Oid, courseID, now.UnixMicro())
+		if err != nil {
+			return "", http.StatusInternalServerError, fmt.Errorf("failed to insert choice for course %s: %w", courseID, err)
+		}
+
+		_course, ok := courses.Load(courseID)
+		if !ok {
+			return "", -1, errNoSuchCourse
+		}
+		course, ok := _course.(*courseT)
+		if !ok {
+			return "", -1, errType
+		}
+		if course == nil {
+			return "", -1, errNoSuchCourse
+		}
+
+		func() {
+			course.SelectedLock.Lock()
+			defer course.SelectedLock.Unlock()
+			atomic.AddUint32(&course.Selected, 1)
+		}()
+	}
+
+	if err := rows.Err(); err != nil {
+		return "", http.StatusInternalServerError, fmt.Errorf("error iterating over pre_selected rows: %w", err)
 	}
 
 	http.Redirect(w, req, "/", http.StatusSeeOther)
