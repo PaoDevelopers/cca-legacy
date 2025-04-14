@@ -278,7 +278,7 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var courseID string
+		var courseID int
 		if err := rows.Scan(&courseID); err != nil {
 			return "", http.StatusInternalServerError, fmt.Errorf("failed to scan course_id: %w", err)
 		}
