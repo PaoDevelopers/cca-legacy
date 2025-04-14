@@ -287,6 +287,10 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 			`INSERT INTO choices (userid, courseid, seltime, forced) VALUES ($1, $2, $3, true)`,
 			claims.Oid, courseID, now.UnixMicro())
 		if err != nil {
+			var pgErr *pgconn.PgError
+			if errors.As(err, &pgErr) && pgErr.Code == pgErrUniqueViolation {
+				continue
+			}
 			return "", http.StatusInternalServerError, fmt.Errorf("failed to insert choice for course %s: %w", courseID, err)
 		}
 
