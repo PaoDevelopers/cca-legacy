@@ -238,9 +238,7 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 		if err != nil {
 			return "", -1, fmt.Errorf("commit transaction: %w", err)
 		}
-
 	} else {
-
 		// TODO: Upsert or something? IIRC that's MySQL rather than Postgres
 		// though; Also this might need to be wrapped in a transaction
 		_, err = db.Exec(
@@ -273,7 +271,6 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 				return "", -1, fmt.Errorf("insert user: %w", err)
 			}
 		}
-
 	}
 
 	http.Redirect(w, req, "/", http.StatusSeeOther)
