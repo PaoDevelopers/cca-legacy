@@ -169,33 +169,30 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 
 	localpart, _, ok := strings.Cut(claims.Email, "@")
 
-	if ok {
-		var legalSex string
-		studentID := strings.TrimPrefix(strings.TrimPrefix(localpart, "s"), "S")
+	if !ok {
+		return "", http.StatusBadRequest, errors.New("Your email address seems to be invalid. Please contact s22537@stu.ykpaoschool.cn")
+	}
 
-		tx, err := db.Begin(req.Context())
-		if err != nil {
-			return "", -1, fmt.Errorf("begin transaction: %w", err)
+	var legalSex string
+	studentID := strings.TrimPrefix(strings.TrimPrefix(localpart, "s"), "S")
+
+	tx, err := db.Begin(req.Context())
+	if err != nil {
+		return "", -1, fmt.Errorf("begin transaction: %w", err)
+	}
+	defer func(ctx context.Context) {
+		if err := tx.Rollback(ctx); err != nil && !errors.Is(err, pgx.ErrTxClosed) {
+			log.Printf("failed to rollback transaction: %v", err)
 		}
-		defer func(ctx context.Context) {
-			if err := tx.Rollback(ctx); err != nil && !errors.Is(err, pgx.ErrTxClosed) {
-				log.Printf("failed to rollback transaction: %v", err)
-			}
-		}(req.Context())
+	}(req.Context())
 
-		err = tx.QueryRow(
-			req.Context(),
-			"SELECT legal_sex from expected_students WHERE id = $1",
-			studentID,
-		).Scan(&legalSex)
-		if err != nil {
-			if errors.Is(err, pgx.ErrNoRows) {
-				return "", http.StatusBadRequest,
-					fmt.Errorf("student %s unexpected", studentID)
-			}
-			return "", -1, fmt.Errorf("query expected_students for registered legal sex: %w", err)
-		}
+	_ = tx.QueryRow( // TODO: No legal sex
+		req.Context(),
+		"SELECT legal_sex from expected_students WHERE id = $1",
+		studentID,
+	).Scan(&legalSex)
 
+	if legalSex != "" {
 		_, err = db.Exec(
 			req.Context(),
 			"INSERT INTO users (id, name, email, department, session, expr, confirmed, legal_sex) VALUES ($1, $2, $3, $4, $5, $6, false, $7)",
@@ -228,24 +225,11 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 				return "", -1, fmt.Errorf("insert user: %w", err)
 			}
 		}
-
-		log.Printf("Student-ish %s (%s, %s) logged in", claims.Name, claims.Email, claims.Oid)
-
-		_, err = tx.Exec(req.Context(), `INSERT INTO choices (userid, courseid, seltime, forced)
-		SELECT $1, course_id, EXTRACT(EPOCH FROM now()) * 1000000, true
-		FROM pre_selected
-		WHERE student_id = $2`, claims.Oid, studentID)
-		if err != nil {
-			return "", http.StatusInternalServerError, fmt.Errorf("failed to move pre_selected choices: %w", err)
-		}
-
-		err = tx.Commit(req.Context())
-		if err != nil {
-			return "", -1, fmt.Errorf("commit transaction: %w", err)
-		}
 	} else {
-		// TODO: Upsert or something? IIRC that's MySQL rather than Postgres
-		// though; Also this might need to be wrapped in a transaction
+		if department != "Staff" {
+			slog.Warn("student with unknown legal sex", "studentID", studentID, "oid", claims.Oid, "email", claims.Email, "name", claims.Name)
+		}
+
 		_, err = db.Exec(
 			req.Context(),
 			"INSERT INTO users (id, name, email, department, session, expr, confirmed) VALUES ($1, $2, $3, $4, $5, $6, false)",
@@ -276,6 +260,21 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 				return "", -1, fmt.Errorf("insert user: %w", err)
 			}
 		}
+	}
+
+	log.Printf("Student-ish %s (%s, %s) logged in", claims.Name, claims.Email, claims.Oid)
+
+	_, err = tx.Exec(req.Context(), `INSERT INTO choices (userid, courseid, seltime, forced)
+		SELECT $1, course_id, EXTRACT(EPOCH FROM now()) * 1000000, true
+		FROM pre_selected
+		WHERE student_id = $2`, claims.Oid, studentID)
+	if err != nil {
+		return "", http.StatusInternalServerError, fmt.Errorf("failed to move pre_selected choices: %w", err)
+	}
+
+	err = tx.Commit(req.Context())
+	if err != nil {
+		return "", -1, fmt.Errorf("commit transaction: %w", err)
 	}
 
 	http.Redirect(w, req, "/", http.StatusSeeOther)
