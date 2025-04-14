@@ -24,7 +24,7 @@ func handleNewStudents(w http.ResponseWriter, req *http.Request) (string, int, e
 		return "", http.StatusMethodNotAllowed, errPostOnly
 	}
 
-	_, _, department, err := getUserInfoFromRequest(req)
+	_, _, department, _, err := getUserInfoFromRequest(req)
 	if err != nil {
 		return "", -1, err
 	}

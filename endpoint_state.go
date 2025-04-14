@@ -36,7 +36,7 @@ func handleState(w http.ResponseWriter, req *http.Request) (string, int, error) 
 		return "", http.StatusMethodNotAllowed, errMethodNotAllowed
 	}
 
-	_, _, department, err := getUserInfoFromRequest(req)
+	_, _, department, _, err := getUserInfoFromRequest(req)
 	if err != nil {
 		return "", http.StatusUnauthorized, err
 	}

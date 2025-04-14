@@ -48,7 +48,7 @@ func handleWs(w http.ResponseWriter, req *http.Request) {
 		_ = c.CloseNow()
 	}()
 
-	userID, _, department, err := getUserInfoFromRequest(req)
+	userID, _, department, _, err := getUserInfoFromRequest(req)
 	if err != nil {
 		_ = writeText(req.Context(), c, "U")
 		return

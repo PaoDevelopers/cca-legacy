@@ -19,7 +19,7 @@ func handleExportStudents(
 	w http.ResponseWriter,
 	req *http.Request,
 ) (string, int, error) {
-	_, _, department, err := getUserInfoFromRequest(req)
+	_, _, department, _, err := getUserInfoFromRequest(req)
 	if err != nil {
 		return "", -1, err
 	}
