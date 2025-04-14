@@ -169,7 +169,7 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 	localpart, _, ok := strings.Cut(claims.Email, "@")
 
 	if !ok {
-		return "", http.StatusBadRequest, errors.New("Your email address seems to be invalid. Please contact s22537@stu.ykpaoschool.cn")
+		return "", http.StatusBadRequest, errors.New("your email address seems to be invalid. Please contact s22537@stu.ykpaoschool.cn")
 	}
 
 	var legalSex string
@@ -271,9 +271,7 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 	}
 
 	if department == "Staff" {
-
 		http.Redirect(w, req, "/", http.StatusSeeOther)
-
 		return "", -1, nil
 	}
 
@@ -298,7 +296,7 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 			if errors.As(err, &pgErr) && pgErr.Code == pgErrUniqueViolation {
 				continue
 			}
-			return "", http.StatusInternalServerError, fmt.Errorf("failed to insert choice for course %s: %w", courseID, err)
+			return "", http.StatusInternalServerError, fmt.Errorf("failed to insert choice for course %d: %w", courseID, err)
 		}
 
 		_course, ok := courses.Load(courseID)
@@ -316,7 +314,7 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 		func() {
 			course.SelectedLock.Lock()
 			defer course.SelectedLock.Unlock()
-			fmt.Println("incremented to", atomic.AddUint32(&course.Selected, 1))
+			atomic.AddUint32(&course.Selected, 1)
 		}()
 	}
 

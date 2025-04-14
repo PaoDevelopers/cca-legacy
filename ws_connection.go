@@ -38,6 +38,7 @@ func handleConn(
 	c *websocket.Conn,
 	userID string,
 	department string,
+	legalSex string,
 ) (reterr error) {
 	_state, ok := states[department]
 	if !ok {
@@ -313,6 +314,7 @@ func handleConn(
 					mar,
 					userID,
 					department,
+					legalSex,
 					&userCourseGroups,
 					&userCourseTypes,
 				)

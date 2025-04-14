@@ -26,6 +26,7 @@ func messageChooseCourse(
 	mar []string,
 	userID string,
 	yeargroup string,
+	legalSex string,
 	userCourseGroups *userCourseGroupsT,
 	userCourseTypes *userCourseTypesT,
 ) error {
@@ -72,6 +73,17 @@ func messageChooseCourse(
 	}
 	if course == nil {
 		return errNoSuchCourse
+	}
+
+	if course.LegalSexReq != "" && course.LegalSexReq != legalSex {
+		err := writeText(ctx, c, "R "+mar[1]+" :Unmatching legal sex")
+		if err != nil {
+			return wrapError(
+				errCannotSend,
+				err,
+			)
+		}
+		return nil
 	}
 
 	if course.Forced {

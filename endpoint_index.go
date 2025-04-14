@@ -14,7 +14,7 @@ import (
 )
 
 func handleIndex(w http.ResponseWriter, req *http.Request) (string, int, error) {
-	_, username, department, _, err := getUserInfoFromRequest(req)
+	_, username, department, _, _, err := getUserInfoFromRequest(req)
 	if errors.Is(err, errNoCookie) || errors.Is(err, errNoSuchUser) {
 		authURL, err2 := generateAuthorizationURL()
 		if err2 != nil {

@@ -48,7 +48,7 @@ func handleWs(w http.ResponseWriter, req *http.Request) {
 		_ = c.CloseNow()
 	}()
 
-	userID, _, department, _, err := getUserInfoFromRequest(req)
+	userID, _, department, _, legalSex, err := getUserInfoFromRequest(req)
 	if err != nil {
 		_ = writeText(req.Context(), c, "U")
 		return
@@ -66,7 +66,7 @@ func handleWs(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = handleConn(req.Context(), c, userID, department)
+	err = handleConn(req.Context(), c, userID, department, legalSex)
 	if err != nil {
 		slog.Error(
 			"websocket",
