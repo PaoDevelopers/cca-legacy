@@ -32,7 +32,9 @@ func handleNewForcedChoices(w http.ResponseWriter, req *http.Request) (string, i
 		return "", http.StatusForbidden, errStaffOnly
 	}
 
-	req.ParseMultipartForm(0)
+	if err := req.ParseMultipartForm(0); err != nil {
+		return "", http.StatusBadRequest, wrapError(errFormNoFile, err)
+	}
 	file, fileHeader, err := req.FormFile("forcedchoicescsv")
 	if err != nil {
 		return "", http.StatusBadRequest, wrapError(errFormNoFile, err)
