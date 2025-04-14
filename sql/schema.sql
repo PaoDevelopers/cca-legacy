@@ -18,12 +18,13 @@ CREATE TABLE users (
 	department TEXT NOT NULL,
 	session TEXT,
 	expr BIGINT, -- seconds
-	confirmed BOOLEAN NOT NULL
+	confirmed BOOLEAN NOT NULL,
+	legal_sex TEXT CHECK (legal_sex in ('F', 'M')) -- ouch
 );
 CREATE TABLE expected_students (
 	id INT PRIMARY KEY NOT NULL,
 	name TEXT NOT NULL,
-	legal_sex TEXT NOT NULL CHECK (legal_sex IN ('F', 'M')) -- ouch
+	legal_sex TEXT NOT NULL CHECK (legal_sex IN ('F', 'M')) -- meh
 );
 CREATE TABLE choices (
 	PRIMARY KEY (userid, courseid),

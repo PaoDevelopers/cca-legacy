@@ -159,36 +159,82 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 
 	claims.Email = strings.ToLower(claims.Email)
 
-	// TODO: Upsert or something? IIRC that's MySQL rather than Postgres
-	// though; Also this might need to be wrapped in a transaction
-	_, err = db.Exec(
-		req.Context(),
-		"INSERT INTO users (id, name, email, department, session, expr, confirmed) VALUES ($1, $2, $3, $4, $5, $6, false)",
-		claims.Oid,
-		claims.Name,
-		claims.Email,
-		department,
-		cookieValue,
-		exprU,
-	)
-	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == pgErrUniqueViolation {
-			_, err := db.Exec(
-				req.Context(),
-				"UPDATE users SET (name, email, department, session, expr) = ($1, $2, $3, $4, $5) WHERE id = $6",
-				claims.Name,
-				claims.Email,
-				department,
-				cookieValue,
-				exprU,
-				claims.Oid,
-			)
-			if err != nil {
-				return "", -1, fmt.Errorf("update user: %w", err)
+	localpart, _, ok := strings.Cut(claims.Email, "@")
+
+	if ok {
+		var legalSex string
+		studentID := strings.TrimPrefix(strings.TrimPrefix(localpart, "s"), "S")
+
+		db.QueryRow(
+			req.Context(),
+			"SELECT legal_sex from expected_students WHERE id = $1",
+			studentID,
+		).Scan(&legalSex)
+		_, err = db.Exec(
+			req.Context(),
+			"INSERT INTO users (id, name, email, department, session, expr, confirmed, legal_sex) VALUES ($1, $2, $3, $4, $5, $6, false, $7)",
+			claims.Oid,
+			claims.Name,
+			claims.Email,
+			department,
+			cookieValue,
+			exprU,
+			legalSex,
+		)
+		if err != nil {
+			var pgErr *pgconn.PgError
+			if errors.As(err, &pgErr) && pgErr.Code == pgErrUniqueViolation {
+				_, err := db.Exec(
+					req.Context(),
+					"UPDATE users SET (name, email, department, session, expr, legal_sex) = ($1, $2, $3, $4, $5, $7) WHERE id = $6",
+					claims.Name,
+					claims.Email,
+					department,
+					cookieValue,
+					exprU,
+					claims.Oid,
+					legalSex,
+				)
+				if err != nil {
+					return "", -1, fmt.Errorf("update user: %w", err)
+				}
+			} else {
+				return "", -1, fmt.Errorf("insert user: %w", err)
 			}
-		} else {
-			return "", -1, fmt.Errorf("insert user: %w", err)
+		}
+	} else {
+
+		// TODO: Upsert or something? IIRC that's MySQL rather than Postgres
+		// though; Also this might need to be wrapped in a transaction
+		_, err = db.Exec(
+			req.Context(),
+			"INSERT INTO users (id, name, email, department, session, expr, confirmed) VALUES ($1, $2, $3, $4, $5, $6, false)",
+			claims.Oid,
+			claims.Name,
+			claims.Email,
+			department,
+			cookieValue,
+			exprU,
+		)
+		if err != nil {
+			var pgErr *pgconn.PgError
+			if errors.As(err, &pgErr) && pgErr.Code == pgErrUniqueViolation {
+				_, err := db.Exec(
+					req.Context(),
+					"UPDATE users SET (name, email, department, session, expr) = ($1, $2, $3, $4, $5) WHERE id = $6",
+					claims.Name,
+					claims.Email,
+					department,
+					cookieValue,
+					exprU,
+					claims.Oid,
+				)
+				if err != nil {
+					return "", -1, fmt.Errorf("update user: %w", err)
+				}
+			} else {
+				return "", -1, fmt.Errorf("insert user: %w", err)
+			}
 		}
 	}
 
