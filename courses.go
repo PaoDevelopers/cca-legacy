@@ -41,6 +41,7 @@ type courseT struct {
 	YearGroups   uint8
 	Usems        sync.Map /* string, *usemT */
 	Forced       bool
+	LegalSexReq  string
 }
 
 var courses sync.Map /* int, *courseT */
@@ -56,7 +57,7 @@ const staffDepartment = "Staff"
 func setupCourses(ctx context.Context) error {
 	rows, err := db.Query(
 		ctx,
-		"SELECT id, nmax, title, ctype, cgroup, teacher, location, course_id, section_id, year_groups, forced FROM courses",
+		"SELECT id, nmax, title, ctype, cgroup, teacher, location, course_id, section_id, year_groups, forced, legal_sex_requirements FROM courses",
 	)
 	if err != nil {
 		return fmt.Errorf("get courses from database: %w", err)
@@ -83,6 +84,7 @@ func setupCourses(ctx context.Context) error {
 			&currentCourse.SectionID,
 			&currentCourse.YearGroups,
 			&currentCourse.Forced,
+			&currentCourse.LegalSexReq,
 		)
 		if err != nil {
 			return fmt.Errorf("scan course: %w", err)
