@@ -15,7 +15,6 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-	"sync/atomic"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -180,7 +179,7 @@ func handleNewForcedChoices(w http.ResponseWriter, req *http.Request) (string, i
 				return false, -1, errNoSuchCourse
 			}
 
-			atomic.AddUint32(&course.Selected, 1)
+			// atomic.AddUint32(&course.Selected, 1)
 		}
 		err = tx.Commit(ctx)
 		if err != nil {
