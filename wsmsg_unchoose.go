@@ -61,7 +61,7 @@ func messageUnchooseCourse(
 	}
 
 	if course.Forced {
-		err := writeText(ctx, c, "RU :Commitment")
+		err := writeText(ctx, c, "RU "+mar[1]+" :Commitment")
 		if err != nil {
 			return wrapError(
 				errCannotSend,

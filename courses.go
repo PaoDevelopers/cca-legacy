@@ -93,7 +93,7 @@ func setupCourses(ctx context.Context) error {
 		if !checkCourseGroup(currentCourse.Group) {
 			return fmt.Errorf("invalid course group in database: %d %s", currentCourse.ID, currentCourse.Group)
 		}
-		var selected1, selected2 uint32
+		var selected1 uint32
 		err := db.QueryRow(
 			ctx,
 			"SELECT COUNT (*) FROM choices WHERE courseid = $1",
@@ -102,12 +102,14 @@ func setupCourses(ctx context.Context) error {
 		if err != nil {
 			return fmt.Errorf("get selected count: %w", err)
 		}
-		err = db.QueryRow(
-			ctx,
-			"SELECT COUNT (*) FROM pre_selected WHERE course_id = $1",
-			currentCourse.ID,
-		).Scan(&selected2)
-		currentCourse.Selected = selected1 + selected2
+		/*
+			err = db.QueryRow(
+				ctx,
+				"SELECT COUNT (*) FROM pre_selected WHERE course_id = $1",
+				currentCourse.ID,
+			).Scan(&selected2)
+		*/
+		currentCourse.Selected = selected1
 		courses.Store(currentCourse.ID, &currentCourse)
 		atomic.AddUint32(&numCourses, 1)
 	}
