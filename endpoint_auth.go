@@ -8,6 +8,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -171,11 +172,11 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 		if err != nil {
 			return "", -1, fmt.Errorf("begin transaction: %w", err)
 		}
-		defer func() {
-			if err := tx.Rollback(req.Context()); err != nil && !errors.Is(err, pgx.ErrTxClosed) {
+		defer func(ctx context.Context) {
+			if err := tx.Rollback(ctx); err != nil && !errors.Is(err, pgx.ErrTxClosed) {
 				log.Printf("failed to rollback transaction: %v", err)
 			}
-		}()
+		}(req.Context())
 
 		err = tx.QueryRow(
 			req.Context(),
