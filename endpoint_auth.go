@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -68,6 +69,8 @@ func generateAuthorizationURL() (string, error) { // \codelabel{generateAuthoriz
 // Expects JSON Web Keys to be already set up correctly; if myKeyfunc is null,
 // a null pointer is dereferenced and the goroutine panics.
 func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) { // \codelabel{handleAuth}
+	slog.Info("handleAuth", "method", req.Method, "url", req.URL.String())
+
 	if req.Method != http.MethodPost {
 		return "", http.StatusMethodNotAllowed,
 			errors.New("only POST is allowed here")
@@ -104,6 +107,10 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 			fmt.Errorf("parse jwt claims: %w", err)
 	}
 
+	claims, claimsOk := token.Claims.(*MicrosoftAuthClaims)
+
+	slog.Info("token claims", "claims", claims)
+
 	switch {
 	case token.Valid:
 		break
@@ -121,8 +128,6 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 		return "", http.StatusBadRequest,
 			fmt.Errorf("invalid jwt: %w", err)
 	}
-
-	claims, claimsOk := token.Claims.(*MicrosoftAuthClaims)
 
 	if !claimsOk { // Should never happen, unless MS breaks their API
 		return "", http.StatusBadRequest,
