@@ -73,6 +73,18 @@ func messageChooseCourse(
 	if course == nil {
 		return errNoSuchCourse
 	}
+
+	if course.Forced {
+		err := writeText(ctx, c, "R "+mar[1]+" :Requires previous commitment")
+		if err != nil {
+			return wrapError(
+				errCannotSend,
+				err,
+			)
+		}
+		return nil
+	}
+
 	if course.YearGroups&yearGroupsNumberBits[yeargroup] == 0 {
 		return errNotForYourYearGroup
 	}
