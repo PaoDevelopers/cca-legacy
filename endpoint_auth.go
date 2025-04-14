@@ -10,12 +10,14 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/MicahParks/keyfunc/v3"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
@@ -165,7 +167,17 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 		var legalSex string
 		studentID := strings.TrimPrefix(strings.TrimPrefix(localpart, "s"), "S")
 
-		db.QueryRow(
+		tx, err := db.Begin(req.Context())
+		if err != nil {
+			return "", -1, fmt.Errorf("begin transaction: %w", err)
+		}
+		defer func() {
+			if err := tx.Rollback(req.Context()); err != nil && !errors.Is(err, pgx.ErrTxClosed) {
+				log.Printf("failed to rollback transaction: %v", err)
+			}
+		}()
+
+		tx.QueryRow(
 			req.Context(),
 			"SELECT legal_sex from expected_students WHERE id = $1",
 			studentID,
@@ -202,6 +214,22 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 				return "", -1, fmt.Errorf("insert user: %w", err)
 			}
 		}
+
+		log.Printf("Student-ish %s (%s, %s) logged in", claims.Name, claims.Email, claims.Oid)
+
+		_, err = tx.Exec(req.Context(), `INSERT INTO choices (userid, courseid, seltime, forced)
+		SELECT $1, course_id, EXTRACT(EPOCH FROM now()) * 1000000, true
+		FROM pre_selected
+		WHERE student_id = $2`, claims.Oid, studentID)
+		if err != nil {
+			return "", http.StatusInternalServerError, fmt.Errorf("failed to move pre_selected choices: %w", err)
+		}
+
+		err = tx.Commit(req.Context())
+		if err != nil {
+			return "", -1, fmt.Errorf("commit transaction: %w", err)
+		}
+
 	} else {
 
 		// TODO: Upsert or something? IIRC that's MySQL rather than Postgres
@@ -236,6 +264,7 @@ func handleAuth(w http.ResponseWriter, req *http.Request) (string, int, error) {
 				return "", -1, fmt.Errorf("insert user: %w", err)
 			}
 		}
+
 	}
 
 	http.Redirect(w, req, "/", http.StatusSeeOther)
