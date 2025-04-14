@@ -57,7 +57,7 @@ const staffDepartment = "Staff"
 func setupCourses(ctx context.Context) error {
 	rows, err := db.Query(
 		ctx,
-		"SELECT id, nmax, title, ctype, cgroup, teacher, location, course_id, section_id, year_groups, forced, legal_sex_requirements FROM courses",
+		"SELECT id, nmax, title, ctype, cgroup, teacher, location, course_id, section_id, year_groups, forced, COALESCE(legal_sex_requirements, '') FROM courses",
 	)
 	if err != nil {
 		return fmt.Errorf("get courses from database: %w", err)
