@@ -38,7 +38,7 @@ func getStudentsThatHaveNotConfirmedTheirChoicesYetIncludingThoseWhoHaveNotLogge
 		if err != nil {
 			return nil, wrapError(errUnexpectedDBError, err)
 		}
-		if currentConfirmed {
+		if currentDepartment == staffDepartment {
 			continue
 		}
 		unamepart, _, _ := strings.Cut(currentEmail, "@")
@@ -46,7 +46,7 @@ func getStudentsThatHaveNotConfirmedTheirChoicesYetIncludingThoseWhoHaveNotLogge
 		nii, _ := strconv.ParseInt(unamepart, 10, 64)
 		delete(ni, nii)
 
-		if currentDepartment == staffDepartment {
+		if currentConfirmed {
 			continue
 		}
 
