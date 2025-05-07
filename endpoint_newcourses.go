@@ -260,20 +260,36 @@ func handleNewCourses(w http.ResponseWriter, req *http.Request) (string, int, er
 				return false, -1, err
 			}
 
-			_, err = tx.Exec(
-				ctx,
-				"INSERT INTO courses(nmax, title, teacher, location, ctype, cgroup, section_id, course_id, legal_sex_requirements, year_groups, forced) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, false)",
-				line[maxIndex],
-				line[titleIndex],
-				line[teacherIndex],
-				line[locationIndex],
-				line[typeIndex],
-				line[groupIndex],
-				line[sectionIDIndex],
-				line[courseIDIndex],
-				line[legalSexIndex],
-				yearGroupsSpec,
-			)
+			if line[legalSexIndex] != "" {
+				_, err = tx.Exec(
+					ctx,
+					"INSERT INTO courses(nmax, title, teacher, location, ctype, cgroup, section_id, course_id, legal_sex_requirements, year_groups, forced) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, false)",
+					line[maxIndex],
+					line[titleIndex],
+					line[teacherIndex],
+					line[locationIndex],
+					line[typeIndex],
+					line[groupIndex],
+					line[sectionIDIndex],
+					line[courseIDIndex],
+					line[legalSexIndex],
+					yearGroupsSpec,
+				)
+			} else {
+				_, err = tx.Exec(
+					ctx,
+					"INSERT INTO courses(nmax, title, teacher, location, ctype, cgroup, section_id, course_id, year_groups, forced) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, false)",
+					line[maxIndex],
+					line[titleIndex],
+					line[teacherIndex],
+					line[locationIndex],
+					line[typeIndex],
+					line[groupIndex],
+					line[sectionIDIndex],
+					line[courseIDIndex],
+					yearGroupsSpec,
+				)
+			}
 			if err != nil {
 				return false, -1, wrapError(
 					errUnexpectedDBError,
