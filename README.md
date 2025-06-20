@@ -12,7 +12,7 @@ You need a [Go](https://go.dev) toolchain, [Pygments](https://pygments.org),
 [TeX Live](https://tug.org/texlive/),
 [minify](https://github.com/tdewolff/minify), and
 [TypeScript](https://www.typescriptlang.org). Minify must be present in `$PATH`
-as `gominify`. A TypeScript compiler must be present in `$PATH` as `tsc`.
+as `minify`. A TypeScript compiler must be present in `$PATH` as `tsc`.
 
 Then just run `make`.
 

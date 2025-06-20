@@ -37,7 +37,7 @@ build/docs/%.csv: docs/%.csv
 
 build/docs/%.html: docs/%.md docs/handbook.css
 	mkdir -p $(@D)
-	pandoc --embed-resources --wrap none --standalone -t html -f markdown --css docs/handbook.css $< | gominify --type html -o $@
+	pandoc --embed-resources --wrap none --standalone -t html -f markdown --css docs/handbook.css $< | minify --type html -o $@
 
 # Extra docs
 
@@ -57,7 +57,7 @@ dist/iadocs/%: build/iadocs/%
 
 build/iadocs/%.htm: iadocs/%.htm
 	mkdir -p $(@D)
-	gominify --html-keep-end-tags --html-keep-document-tags -o $@ $<
+	minify --html-keep-end-tags --html-keep-document-tags -o $@ $<
 
 build/iadocs/index.html: build/iadocs/cover_page.htm
 	cp $< $@
@@ -108,12 +108,12 @@ build/iadocs/%.bib: iadocs/%.bib
 
 build/static/style.css: frontend/style.css
 	mkdir -p $(@D)
-	gominify -o $@ $<
+	minify -o $@ $<
 
 build/static/student.js: frontend/student.ts
 	mkdir -p $(@D)
 	tsc $< --target ES6 --strict --noImplicitAny --outFile $@
-	gominify -o $@ $@
+	minify -o $@ $@
 
 # Cleaning (git clean -xfd is a bit too aggressive, I lost my config once)
 
