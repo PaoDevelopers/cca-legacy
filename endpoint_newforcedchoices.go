@@ -15,6 +15,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -52,6 +53,9 @@ func handleNewForcedChoices(w http.ResponseWriter, req *http.Request) (string, i
 	if titleLine == nil {
 		return "", -1, errUnexpectedNilCSVLine
 	}
+	if len(titleLine) > 0 {
+		titleLine[0] = strings.TrimPrefix(titleLine[0], "\uFEFF")
+	}
 	if len(titleLine) != 2 {
 		return "", -1, wrapAny(
 			errBadCSVFormat,
@@ -71,7 +75,7 @@ func handleNewForcedChoices(w http.ResponseWriter, req *http.Request) (string, i
 	if studentIDIndex == -1 {
 		return "", http.StatusBadRequest, wrapAny(
 			errMissingCSVColumn,
-			"ID",
+			"Student ID",
 		)
 	}
 	if sectionIDIndex == -1 {

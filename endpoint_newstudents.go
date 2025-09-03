@@ -15,6 +15,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -48,6 +49,9 @@ func handleNewStudents(w http.ResponseWriter, req *http.Request) (string, int, e
 	}
 	if titleLine == nil {
 		return "", -1, errUnexpectedNilCSVLine
+	}
+	if len(titleLine) > 0 {
+		titleLine[0] = strings.TrimPrefix(titleLine[0], "\uFEFF")
 	}
 	if len(titleLine) != 3 {
 		return "", -1, wrapAny(
