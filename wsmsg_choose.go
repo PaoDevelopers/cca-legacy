@@ -112,27 +112,27 @@ func messageChooseCourse(
 		return nil
 	}
 
-	oppositeGroup := ""
-	for _, r := range course.Group {
-		switch r {
-		case '2':
-			oppositeGroup += "3"
-		case '3':
-			oppositeGroup += "2"
-		default:
-			oppositeGroup += string(r)
-		}
-	}
-	if _, ok := (*userCourseGroups)[oppositeGroup]; ok {
-		err := writeText(ctx, c, "R "+mar[1]+" :You cannot choose both CCA2 and CCA3 on the same day")
-		if err != nil {
-			return wrapError(
-				errCannotSend,
-				err,
-			)
-		}
-		return nil
-	}
+	//	oppositeGroup := ""
+	//	for _, r := range course.Group {
+	//		switch r {
+	//		case '2':
+	//			oppositeGroup += "3"
+	//		case '3':
+	//			oppositeGroup += "2"
+	//		default:
+	//			oppositeGroup += string(r)
+	//		}
+	//	}
+	//	if _, ok := (*userCourseGroups)[oppositeGroup]; ok {
+	//		err := writeText(ctx, c, "R "+mar[1]+" :You cannot choose both CCA2 and CCA3 on the same day")
+	//		if err != nil {
+	//			return wrapError(
+	//				errCannotSend,
+	//				err,
+	//			)
+	//		}
+	//		return nil
+	//	}
 
 	err = func() (returnedError error) {
 		tx, err := db.Begin(ctx)
