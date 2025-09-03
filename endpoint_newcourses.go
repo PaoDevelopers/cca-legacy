@@ -63,6 +63,9 @@ func handleNewCourses(w http.ResponseWriter, req *http.Request) (string, int, er
 	if titleLine == nil {
 		return "", -1, errUnexpectedNilCSVLine
 	}
+	if len(titleLine) > 0 {
+		titleLine[0] = strings.TrimPrefix(titleLine[0], "\uFEFF")
+	}
 	if len(titleLine) != 10 {
 		return "", -1, wrapAny(
 			errBadCSVFormat,
