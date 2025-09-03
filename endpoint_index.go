@@ -9,12 +9,17 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"strings"
 	"sync/atomic"
+	"time"
+
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func handleIndex(w http.ResponseWriter, req *http.Request) (string, int, error) {
-	_, username, department, _, _, err := getUserInfoFromRequest(req)
+	userID, username, department, email, _, err := getUserInfoFromRequest(req)
 	if errors.Is(err, errNoCookie) || errors.Is(err, errNoSuchUser) {
 		authURL, err2 := generateAuthorizationURL()
 		if err2 != nil {
@@ -179,6 +184,65 @@ func handleIndex(w http.ResponseWriter, req *http.Request) (string, int, error) 
 	)
 	if err != nil {
 		return "", -1, err
+	}
+
+	// get the student id 12345 from email s12345@domain
+	userpart, _, found := strings.Cut(email, "@")
+	if !found {
+		return "", http.StatusInternalServerError, fmt.Errorf("email %q does not contain @", email)
+	}
+	if len(userpart) < 2 || (userpart[0] != 's' && userpart[0] != 'S') {
+		return "", http.StatusInternalServerError, fmt.Errorf("email %q does not start with s or S", email)
+	}
+	studentID := userpart[1:]
+
+	// TODO
+	rows, err := db.Query(req.Context(), `SELECT course_id FROM pre_selected WHERE student_id = $1`, studentID)
+	if err != nil {
+		return "", http.StatusInternalServerError, fmt.Errorf("failed to fetch pre_selected choices: %w", err)
+	}
+	defer rows.Close()
+
+	now := time.Now()
+
+	for rows.Next() {
+		var courseID int
+		if err := rows.Scan(&courseID); err != nil {
+			return "", http.StatusInternalServerError, fmt.Errorf("failed to scan course_id: %w", err)
+		}
+
+		_, err = db.Exec(req.Context(),
+			`INSERT INTO choices (userid, courseid, seltime, forced) VALUES ($1, $2, $3, true)`,
+			userID, courseID, now.UnixMicro())
+		if err != nil {
+			var pgErr *pgconn.PgError
+			if errors.As(err, &pgErr) && pgErr.Code == pgErrUniqueViolation {
+				continue
+			}
+			return "", http.StatusInternalServerError, fmt.Errorf("failed to insert choice for course %d: %w", courseID, err)
+		}
+
+		_course, ok := courses.Load(courseID)
+		if !ok {
+			return "", -1, errNoSuchCourse
+		}
+		course, ok := _course.(*courseT)
+		if !ok {
+			return "", -1, errType
+		}
+		if course == nil {
+			return "", -1, errNoSuchCourse
+		}
+
+		func() {
+			course.SelectedLock.Lock()
+			defer course.SelectedLock.Unlock()
+			atomic.AddUint32(&course.Selected, 1)
+		}()
+	}
+
+	if err := rows.Err(); err != nil {
+		return "", http.StatusInternalServerError, fmt.Errorf("error iterating over pre_selected rows: %w", err)
 	}
 
 	err = tmpl.ExecuteTemplate(

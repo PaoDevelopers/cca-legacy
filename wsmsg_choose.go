@@ -87,7 +87,7 @@ func messageChooseCourse(
 	}
 
 	if course.Forced {
-		err := writeText(ctx, c, "R "+mar[1]+" :Requires previous commitment")
+		err := writeText(ctx, c, "R "+mar[1]+" :Cannot manually select")
 		if err != nil {
 			return wrapError(
 				errCannotSend,
