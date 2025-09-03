@@ -55,7 +55,7 @@ func handleNewForcedChoices(w http.ResponseWriter, req *http.Request) (string, i
 	if len(titleLine) != 2 {
 		return "", -1, wrapAny(
 			errBadCSVFormat,
-			"expecting 2 fields on the first line (Name, ID, Legal Sex)",
+			"expecting 2 fields on the first line (Student ID, Section ID)",
 		)
 	}
 	var studentIDIndex, sectionIDIndex int = -1, -1
