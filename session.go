@@ -8,6 +8,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
@@ -31,7 +32,7 @@ func getUserInfoFromRequest(req *http.Request) (userID,
 	}
 
 	err = db.QueryRow(
-		req.Context(),
+		context.Background(),
 		"SELECT id, name, department, email, COALESCE(legal_sex, '') FROM users WHERE session = $1",
 		sessionCookie.Value,
 	).Scan(&userID, &username, &department, &email, &legalSex)
