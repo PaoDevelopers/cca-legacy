@@ -137,12 +137,12 @@ func messageChooseCourse(
 	err = func() (returnedError error) {
 		tx, err := db.Begin(ctx)
 		if err != nil {
-			return wrapError(errors.New("unexpected database error 0"), err)
+			return wrapError(errors.New("unexpected database error 34"), err)
 		}
 		defer func() {
 			err := tx.Rollback(ctx)
 			if err != nil && (!errors.Is(err, pgx.ErrTxClosed)) {
-				returnedError = wrapError(errors.New("unexpected database error 0"), err)
+				returnedError = wrapError(errors.New("unexpected database error 35"), err)
 				return
 			}
 		}()
@@ -162,12 +162,12 @@ func messageChooseCourse(
 				if err2 != nil {
 					return wrapError(
 						err2,
-						wrapError(errors.New("unexpected database error 0"), err),
+						wrapError(errors.New("unexpected database error 36"), err),
 					)
 				}
 				return nil
 			}
-			return wrapError(errors.New("unexpected database error 0"), err)
+			return wrapError(errors.New("unexpected database error 37"), err)
 		}
 
 		ok := func() bool {
@@ -207,7 +207,7 @@ func messageChooseCourse(
 						err,
 					)
 				}
-				return wrapError(errors.New("unexpected database error 0"), err)
+				return wrapError(errors.New("unexpected database error 38"), err)
 			}
 
 			/*
@@ -237,7 +237,7 @@ func messageChooseCourse(
 		} else {
 			err := tx.Rollback(ctx)
 			if err != nil {
-				return wrapError(errors.New("unexpected database error 0"), err)
+				return wrapError(errors.New("unexpected database error 39"), err)
 			}
 			err = writeText(ctx, c, "R "+mar[1]+" :Full")
 			if err != nil {

@@ -57,10 +57,10 @@ func loadStateAndSchedule() error {
 					time.Time{},
 				)
 				if err != nil {
-					return wrapError(errors.New("unexpected database error 0"), err)
+					return wrapError(errors.New("unexpected database error 30"), err)
 				}
 			} else {
-				return wrapError(errors.New("unexpected database error 0"), err)
+				return wrapError(errors.New("unexpected database error 31"), err)
 			}
 		}
 		_state, ok := states[yeargroup]
@@ -85,7 +85,7 @@ func saveStateValue(ctx context.Context, yeargroup string, newState uint32) erro
 		newState,
 	)
 	if err != nil {
-		return wrapError(errors.New("unexpected database error 0"), err)
+		return wrapError(errors.New("unexpected database error 32"), err)
 	}
 	return nil
 }
@@ -98,7 +98,7 @@ func saveScheduleValue(ctx context.Context, yeargroup string, newSchedule *time.
 		*newSchedule,
 	)
 	if err != nil {
-		return wrapError(errors.New("unexpected database error 0"), err)
+		return wrapError(errors.New("unexpected database error 33"), err)
 	}
 	return nil
 }

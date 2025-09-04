@@ -41,11 +41,11 @@ func messageHello(
 		userID,
 	)
 	if err != nil {
-		return wrapError(errors.New("unexpected database error 0"), err)
+		return wrapError(errors.New("unexpected database error 41"), err)
 	}
 	courseIDs, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
-		return wrapError(errors.New("unexpected database error 0"), err)
+		return wrapError(errors.New("unexpected database error 42"), err)
 	}
 
 	_state, ok := states[yeargroup]

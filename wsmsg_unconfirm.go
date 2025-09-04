@@ -54,7 +54,7 @@ func messageUnconfirm(
 		userID,
 	)
 	if err != nil {
-		return wrapError(errors.New("unexpected database error 0"), err)
+		return wrapError(errors.New("unexpected database error 44"), err)
 	}
 
 	return writeText(

@@ -78,7 +78,7 @@ func messageConfirm(
 		userID,
 	)
 	if err != nil {
-		return wrapError(errors.New("unexpected database error 0"), err)
+		return wrapError(errors.New("unexpected database error 40"), err)
 	}
 
 	return writeText(

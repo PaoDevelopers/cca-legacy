@@ -93,13 +93,13 @@ func handleNewForcedChoices(w http.ResponseWriter, req *http.Request) (string, i
 	) {
 		tx, err := db.Begin(ctx)
 		if err != nil {
-			return false, -1, wrapError(errors.New("unexpected database error 0"), err)
+			return false, -1, wrapError(errors.New("unexpected database error 16"), err)
 		}
 		defer func() {
 			err := tx.Rollback(ctx)
 			if err != nil && (!errors.Is(err, pgx.ErrTxClosed)) {
 				retBool, retStatus, retErr = false, -1, wrapError(
-					errors.New("unexpected database error 0"),
+					errors.New("unexpected database error 17"),
 					err,
 				)
 				return
@@ -110,7 +110,7 @@ func handleNewForcedChoices(w http.ResponseWriter, req *http.Request) (string, i
 			"DELETE FROM pre_selected",
 		)
 		if err != nil {
-			return false, -1, wrapError(errors.New("unexpected database error 0"), err)
+			return false, -1, wrapError(errors.New("unexpected database error 18"), err)
 		}
 
 		for {
@@ -170,7 +170,7 @@ func handleNewForcedChoices(w http.ResponseWriter, req *http.Request) (string, i
 				courseID,
 			)
 			if err != nil {
-				return false, -1, wrapError(errors.New("unexpected database error 0"), err)
+				return false, -1, wrapError(errors.New("unexpected database error 19"), err)
 			}
 
 			_course, ok := courses.Load(courseID)
@@ -189,7 +189,7 @@ func handleNewForcedChoices(w http.ResponseWriter, req *http.Request) (string, i
 		}
 		err = tx.Commit(ctx)
 		if err != nil {
-			return false, -1, wrapError(errors.New("unexpected database error 0"), err)
+			return false, -1, wrapError(errors.New("unexpected database error 20"), err)
 		}
 		return true, -1, nil
 	}(req.Context())

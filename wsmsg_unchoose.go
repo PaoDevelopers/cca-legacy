@@ -79,7 +79,7 @@ func messageUnchooseCourse(
 		courseID,
 	)
 	if err != nil {
-		return wrapError(errors.New("unexpected database error 0"), err)
+		return wrapError(errors.New("unexpected database error 43"), err)
 	}
 
 	if ct.RowsAffected() != 0 {

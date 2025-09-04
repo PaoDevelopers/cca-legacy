@@ -30,7 +30,7 @@ func handleExportStudents(
 
 	ni, err := queryNameID(req.Context(), "SELECT name, id FROM expected_students")
 	if err != nil {
-		return "", -1, wrapError(errors.New("unexpected database error 0"), err)
+		return "", -1, wrapError(errors.New("unexpected database error 5"), err)
 	}
 
 	rows, err := db.Query(
@@ -38,14 +38,14 @@ func handleExportStudents(
 		"SELECT name, email, department, confirmed FROM users",
 	)
 	if err != nil {
-		return "", -1, wrapError(errors.New("unexpected database error 0"), err)
+		return "", -1, wrapError(errors.New("unexpected database error 6"), err)
 	}
 	output := make([][]string, 0)
 	for {
 		if !rows.Next() {
 			err := rows.Err()
 			if err != nil {
-				return "", -1, wrapError(errors.New("unexpected database error 0"), err)
+				return "", -1, wrapError(errors.New("unexpected database error 7"), err)
 			}
 			break
 		}
@@ -58,7 +58,7 @@ func handleExportStudents(
 			&currentConfirmed,
 		)
 		if err != nil {
-			return "", -1, wrapError(errors.New("unexpected database error 0"), err)
+			return "", -1, wrapError(errors.New("unexpected database error 8"), err)
 		}
 		unamepart, _, _ := strings.Cut(currentEmail, "@")
 		unamepart = strings.TrimPrefix(strings.TrimPrefix(unamepart, "s"), "S")
