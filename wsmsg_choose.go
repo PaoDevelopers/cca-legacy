@@ -137,12 +137,12 @@ func messageChooseCourse(
 	err = func() (returnedError error) {
 		tx, err := db.Begin(ctx)
 		if err != nil {
-			return wrapError(errUnexpectedDBError, err)
+			return wrapError(errors.New("unexpected database error 0"), err)
 		}
 		defer func() {
 			err := tx.Rollback(ctx)
 			if err != nil && (!errors.Is(err, pgx.ErrTxClosed)) {
-				returnedError = wrapError(errUnexpectedDBError, err)
+				returnedError = wrapError(errors.New("unexpected database error 0"), err)
 				return
 			}
 		}()
@@ -162,12 +162,12 @@ func messageChooseCourse(
 				if err2 != nil {
 					return wrapError(
 						err2,
-						wrapError(errUnexpectedDBError, err),
+						wrapError(errors.New("unexpected database error 0"), err),
 					)
 				}
 				return nil
 			}
-			return wrapError(errUnexpectedDBError, err)
+			return wrapError(errors.New("unexpected database error 0"), err)
 		}
 
 		ok := func() bool {
@@ -207,7 +207,7 @@ func messageChooseCourse(
 						err,
 					)
 				}
-				return wrapError(errUnexpectedDBError, err)
+				return wrapError(errors.New("unexpected database error 0"), err)
 			}
 
 			/*
@@ -237,7 +237,7 @@ func messageChooseCourse(
 		} else {
 			err := tx.Rollback(ctx)
 			if err != nil {
-				return wrapError(errUnexpectedDBError, err)
+				return wrapError(errors.New("unexpected database error 0"), err)
 			}
 			err = writeText(ctx, c, "R "+mar[1]+" :Full")
 			if err != nil {

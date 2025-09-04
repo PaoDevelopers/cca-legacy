@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"strings"
 )
@@ -9,7 +10,7 @@ import (
 func getStudentsThatHaveNotConfirmedTheirChoicesYetIncludingThoseWhoHaveNotLoggedInAtAll(ctx context.Context) (res []studentish, err error) {
 	ni, err := queryNameID(ctx, "SELECT name, id FROM expected_students ORDER BY id")
 	if err != nil {
-		return nil, wrapError(errUnexpectedDBError, err)
+		return nil, wrapError(errors.New("unexpected database error 0"), err)
 	}
 
 	rows, err := db.Query(
@@ -17,13 +18,13 @@ func getStudentsThatHaveNotConfirmedTheirChoicesYetIncludingThoseWhoHaveNotLogge
 		"SELECT name, email, department, confirmed FROM users ORDER BY email",
 	)
 	if err != nil {
-		return nil, wrapError(errUnexpectedDBError, err)
+		return nil, wrapError(errors.New("unexpected database error 0"), err)
 	}
 	for {
 		if !rows.Next() {
 			err := rows.Err()
 			if err != nil {
-				return nil, wrapError(errUnexpectedDBError, err)
+				return nil, wrapError(errors.New("unexpected database error 0"), err)
 			}
 			break
 		}
@@ -36,7 +37,7 @@ func getStudentsThatHaveNotConfirmedTheirChoicesYetIncludingThoseWhoHaveNotLogge
 			&currentConfirmed,
 		)
 		if err != nil {
-			return nil, wrapError(errUnexpectedDBError, err)
+			return nil, wrapError(errors.New("unexpected database error 0"), err)
 		}
 		if currentDepartment == staffDepartment {
 			continue

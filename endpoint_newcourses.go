@@ -171,13 +171,13 @@ func handleNewCourses(w http.ResponseWriter, req *http.Request) (string, int, er
 	) {
 		tx, err := db.Begin(ctx)
 		if err != nil {
-			return false, -1, wrapError(errUnexpectedDBError, err)
+			return false, -1, wrapError(errors.New("unexpected database error 0"), err)
 		}
 		defer func() {
 			err := tx.Rollback(ctx)
 			if err != nil && (!errors.Is(err, pgx.ErrTxClosed)) {
 				retBool, retStatus, retErr = false, -1, wrapError(
-					errUnexpectedDBError,
+					errors.New("unexpected database error 0"),
 					err,
 				)
 				return
@@ -188,21 +188,21 @@ func handleNewCourses(w http.ResponseWriter, req *http.Request) (string, int, er
 			"DELETE FROM choices",
 		)
 		if err != nil {
-			return false, -1, wrapError(errUnexpectedDBError, err)
+			return false, -1, wrapError(errors.New("unexpected database error 0"), err)
 		}
 		_, err = tx.Exec(
 			ctx,
 			"UPDATE users SET confirmed = false",
 		)
 		if err != nil {
-			return false, -1, wrapError(errUnexpectedDBError, err)
+			return false, -1, wrapError(errors.New("unexpected database error 0"), err)
 		}
 		_, err = tx.Exec(
 			ctx,
 			"DELETE FROM courses",
 		)
 		if err != nil {
-			return false, -1, wrapError(errUnexpectedDBError, err)
+			return false, -1, wrapError(errors.New("unexpected database error 0"), err)
 		}
 
 		for {
@@ -295,14 +295,14 @@ func handleNewCourses(w http.ResponseWriter, req *http.Request) (string, int, er
 			}
 			if err != nil {
 				return false, -1, wrapError(
-					errUnexpectedDBError,
+					errors.New("unexpected database error 0"),
 					err,
 				)
 			}
 		}
 		err = tx.Commit(ctx)
 		if err != nil {
-			return false, -1, wrapError(errUnexpectedDBError, err)
+			return false, -1, wrapError(errors.New("unexpected database error 0"), err)
 		}
 		return true, -1, nil
 	}(req.Context())

@@ -40,7 +40,7 @@ func getUserInfoFromRequest(req *http.Request) (userID,
 			retErr = errNoSuchUser
 			return
 		}
-		retErr = wrapError(errUnexpectedDBError, err)
+		retErr = wrapError(errors.New("unexpected database error 0"), err)
 		return
 	}
 	return

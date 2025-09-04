@@ -9,6 +9,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync/atomic"
 
@@ -77,7 +78,7 @@ func messageConfirm(
 		userID,
 	)
 	if err != nil {
-		return wrapError(errUnexpectedDBError, err)
+		return wrapError(errors.New("unexpected database error 0"), err)
 	}
 
 	return writeText(

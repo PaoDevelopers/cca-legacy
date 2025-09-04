@@ -26,7 +26,6 @@ var (
 	errMultipleChoicesInOneGroup        = errors.New("multiple choices per group per user")
 	errCourseGroupHandlingError         = errors.New("error handling course group")
 	errUnsupportedDatabaseType          = errors.New("unsupported db type")
-	errUnexpectedDBError                = errors.New("unexpected database error")
 	errCannotSend                       = errors.New("cannot send")
 	errCannotGenerateRandomString       = errors.New("cannot generate random string")
 	errWsHandlerContextCanceled         = errors.New("websocket handler context canceled (perhaps you logged in on another connection?)")

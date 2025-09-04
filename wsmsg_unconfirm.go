@@ -9,6 +9,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"sync/atomic"
 
 	"github.com/coder/websocket"
@@ -53,7 +54,7 @@ func messageUnconfirm(
 		userID,
 	)
 	if err != nil {
-		return wrapError(errUnexpectedDBError, err)
+		return wrapError(errors.New("unexpected database error 0"), err)
 	}
 
 	return writeText(

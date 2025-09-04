@@ -98,13 +98,13 @@ func handleNewStudents(w http.ResponseWriter, req *http.Request) (string, int, e
 	) {
 		tx, err := db.Begin(ctx)
 		if err != nil {
-			return false, -1, wrapError(errUnexpectedDBError, err)
+			return false, -1, wrapError(errors.New("unexpected database error 0"), err)
 		}
 		defer func() {
 			err := tx.Rollback(ctx)
 			if err != nil && (!errors.Is(err, pgx.ErrTxClosed)) {
 				retBool, retStatus, retErr = false, -1, wrapError(
-					errUnexpectedDBError,
+					errors.New("unexpected database error 0"),
 					err,
 				)
 				return
@@ -115,7 +115,7 @@ func handleNewStudents(w http.ResponseWriter, req *http.Request) (string, int, e
 			"DELETE FROM expected_students",
 		)
 		if err != nil {
-			return false, -1, wrapError(errUnexpectedDBError, err)
+			return false, -1, wrapError(errors.New("unexpected database error 0"), err)
 		}
 
 		for {
@@ -167,14 +167,14 @@ func handleNewStudents(w http.ResponseWriter, req *http.Request) (string, int, e
 			)
 			if err != nil {
 				return false, -1, wrapError(
-					errUnexpectedDBError,
+					errors.New("unexpected database error 0"),
 					err,
 				)
 			}
 		}
 		err = tx.Commit(ctx)
 		if err != nil {
-			return false, -1, wrapError(errUnexpectedDBError, err)
+			return false, -1, wrapError(errors.New("unexpected database error 0"), err)
 		}
 		return true, -1, nil
 	}(req.Context())
@@ -192,7 +192,7 @@ func queryNameID(ctx context.Context, query string, args ...any) (result map[int
 	var rows pgx.Rows
 
 	if rows, err = db.Query(ctx, query, args...); err != nil {
-		return nil, wrapError(errUnexpectedDBError, err)
+		return nil, wrapError(errors.New("unexpected database error 0"), err)
 	}
 	defer rows.Close()
 
@@ -200,12 +200,12 @@ func queryNameID(ctx context.Context, query string, args ...any) (result map[int
 		var name string
 		var id int64
 		if err = rows.Scan(&name, &id); err != nil {
-			return nil, wrapError(errUnexpectedDBError, err)
+			return nil, wrapError(errors.New("unexpected database error 0"), err)
 		}
 		result[id] = name
 	}
 	if err = rows.Err(); err != nil {
-		return nil, wrapError(errUnexpectedDBError, err)
+		return nil, wrapError(errors.New("unexpected database error 0"), err)
 	}
 	return result, nil
 }

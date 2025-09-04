@@ -9,6 +9,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"sync/atomic"
 
@@ -78,7 +79,7 @@ func messageUnchooseCourse(
 		courseID,
 	)
 	if err != nil {
-		return wrapError(errUnexpectedDBError, err)
+		return wrapError(errors.New("unexpected database error 0"), err)
 	}
 
 	if ct.RowsAffected() != 0 {

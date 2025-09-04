@@ -9,6 +9,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"sync/atomic"
 
@@ -40,11 +41,11 @@ func messageHello(
 		userID,
 	)
 	if err != nil {
-		return wrapError(errUnexpectedDBError, err)
+		return wrapError(errors.New("unexpected database error 0"), err)
 	}
 	courseIDs, err := pgx.CollectRows(rows, pgx.RowTo[string])
 	if err != nil {
-		return wrapError(errUnexpectedDBError, err)
+		return wrapError(errors.New("unexpected database error 0"), err)
 	}
 
 	_state, ok := states[yeargroup]
