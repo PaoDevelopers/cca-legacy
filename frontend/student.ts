@@ -188,7 +188,7 @@ function handle_course_max_update(course_id: string, selected_count: string): vo
 	const checkbox = document.getElementById(`tick${course_id}`) as HTMLInputElement;
 
 	selected_element.textContent = selected_count;
-	checkbox.disabled = selected_count === max_element.textContent && !checkbox.checked;
+	checkbox.disabled = false;
 }
 
 function handle_course_rejection(course_id: string, reason: string): void {
@@ -245,10 +245,7 @@ function handle_start_state(): void {
 		const selected = course.querySelector('.selected-number')!;
 		const max = course.querySelector('.max-number')!;
 
-		checkbox.disabled = !(
-			selected.textContent !== max.textContent ||
-			checkbox.checked
-		);
+		checkbox.disabled = false;
 	});
 
 	update_confirm_button_state();
