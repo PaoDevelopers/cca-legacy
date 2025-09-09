@@ -5,7 +5,7 @@ default: dist/cca docs iadocs
 # Docs file lists
 
 DOCS_FILES := admin_handbook.html cca.scfg.example azure.json courses_example.csv schema.sql drop.sql
-IADOCS_FILES := index.html cover_page.htm appendix.pdf crita_planning.pdf critb_design.pdf \
+IADOCS_FILES := index.html cover_page.htm appendixa_interview.pdf appendixb_code.pdf crita_planning.pdf critb_design.pdf \
                 critb_recordoftasks.htm critc_development.pdf critd_functionality.pdf crite_evaluation.pdf
 
 # Create docs and iadocs targets using patterns
@@ -71,7 +71,7 @@ build/iadocs/%.pdf: iadocs/%.tex build/iadocs/header.texinc build/iadocs/bib.bib
 
 # Special case for Criterion C which needs the appendix's references
 
-build/iadocs/critc_development.pdf: iadocs/critc_development.tex build/iadocs/header.texinc build/iadocs/bib.bib build/iadocs/appendix.pdf
+build/iadocs/critc_development.pdf: iadocs/critc_development.tex build/iadocs/header.texinc build/iadocs/bib.bib build/iadocs/appendixb_code.pdf
 	# Technically I need build/iadocs/appendix.aux instead of build/iadocs/appendix.pdf
 	mkdir -p $(@D)
 	cp iadocs/critc_development.tex $(@D)
@@ -83,7 +83,7 @@ build/iadocs/critc_development.pdf: iadocs/critc_development.tex build/iadocs/he
 
 # Special case for the appendix and the PDF'ed source code
 
-build/iadocs/appendix.pdf: iadocs/appendix.tex build/iadocs/source.gen build/iadocs/agpl.texinc
+build/iadocs/appendixb_code.pdf: iadocs/appendixb_code.tex build/iadocs/source.gen build/iadocs/agpl.texinc
 	mkdir -p $(@D)
 	lualatex -interaction batchmode -shell-escape -output-directory=build/iadocs $<
 	lualatex -interaction batchmode -shell-escape -output-directory=build/iadocs $<
